@@ -152,6 +152,14 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			)
 		)
 
+	# Todo notes for customEvents:
+	# - there's some issue with saving settings. Like changing the customEvent's message & save doesn't update
+	#   (also removing a customEvent & saving still fires that event)
+	# - need to add ability to "scope down" the payload like OctoPrint-IFTTT
+	# - later: will need to add docs to README (and update README link in jinja2 file)
+	# - question: does there need to be a "migrate" to initialize [] for customEvents for already-existing hooks?
+	# - question: translations? Looks like only a few things are translated in the jinja2 file
+
 	def on_after_startup(self):
 		self._logger.info("Hello World from WebhooksPlugin!")
 		# Update the settings if necessary
@@ -198,6 +206,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					eventUserActionNeededMessage="User action needed. You might need to change the filament color.",
 					eventPrintProgressMessage="Your print is @percentCompleteMilestone % complete.",
 					eventErrorMessage="There was an error.",
+					customEvents=[],
 					headers='{\n  "Content-Type": "application/json"\n}',
 					data='{\n  "deviceIdentifier":"@deviceIdentifier",\n  "apiSecret":"@apiSecret",\n  "topic":"@topic",\n  "message":"@message",\n  "extra":"@extra",\n  "state": "@state",\n  "job": "@job",\n  "progress": "@progress",\n  "currentZ": "@currentZ",\n  "offsets": "@offsets",\n  "meta": "@meta",\n  "currentTime": "@currentTime",\n  "snapshot": "@snapshot"\n}',
 					http_method="POST",
@@ -348,6 +357,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			topic = "Unknown"
 			message = "Unknown"
 			extra = payload
+			self._logger.info(f"event: {event}") # temp for debugging
+			self._logger.info(f"payload: {payload}") # temp for debugging
 			# 0) Determine the topic and message parameters and if we are parsing this event.
 			if event == Events.PRINT_STARTED and hook["eventPrintStarted"]:
 				topic = "Print Started"
@@ -371,11 +382,23 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				topic = "Error"
 				message = hook["eventErrorMessage"]
 			else:
+				skipProcessing = True
 				if "hook_index" in payload:
 					# This is a test event - show a message to the user that they need to enable this event.
 					msg = "This event is disabled. Please enable the event %s to test." % event
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=False, msg=msg))
-				continue
+				else:
+					customEvents = hook["customEvents"]
+					for customEvent in customEvents:
+						if customEvent["name"] != event: continue
+
+						message = customEvent["message"] #Todo: I think this is where we need to scope down the payload (if needed)
+						skipProcessing = False
+						break
+
+				if skipProcessing:
+					continue
+			
 			self._logger.info("P EVENT " + topic + " - " + message)
 			# 1) If necessary, make an OAuth request to get back an access token.
 			oauth = hook["oauth"]
@@ -499,6 +522,9 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				data = replace_dict_with_data(data, values)
 				headers = replace_dict_with_data(headers, values)
 				url = replace_url_with_data(url, values)
+				self._logger.info(f"url: {url}") # temp for debugging
+				self._logger.info(f"values: {values}") # temp for debugging
+				self._logger.info(f"data: {data}") # temp for debugging
 				# 2.6) Send the request
 				response = ""
 				if http_method == "GET":
