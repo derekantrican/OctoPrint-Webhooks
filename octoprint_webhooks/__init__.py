@@ -606,16 +606,16 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 		# Private functions - Print Job Notifications
 
-    def scope_payload(self, payload, value):
-        to_thunk = lambda x: lambda: x
+	def scope_payload(self, payload, value):
+		to_thunk = lambda x: lambda: x
 
-        if value[0] == ".":
+		if value[0] == ".":
 			if value[1:]:
-                return to_thunk(payload[value[1:]])
-            else:
-                return to_thunk(payload)
+				return to_thunk(payload[value[1:]])
+			else:
+				return to_thunk(payload)
 
-        return to_thunk(value)
+		return to_thunk(value)
 
 	# Create an image by getting an image from the setting webcam-snapshot.
 	# Transpose this image according the settings and returns it
