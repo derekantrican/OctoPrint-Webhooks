@@ -153,9 +153,10 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		)
 
 	# Todo notes for customEvents:
-	# - there's some issue with saving settings. Like changing the customEvent's message & save doesn't update
-	#   (also removing a customEvent & saving still fires that event)
-	# - need to add ability to "scope down" the payload like OctoPrint-IFTTT
+	# - there's some issue with saving settings. It seems to only respect the first change after a restart.
+	#   So in order to change the customEvent message (for example) you need to restart octprint, go to settings,
+	#   make your change, and click save. If you make another change after this & click save it won't be respected
+	#   (even though the settings UI will show the new value - it isn't actually saved).
 	# - later: will need to add docs to README (and update README link in jinja2 file)
 	# - question: does there need to be a "migrate" to initialize [] for customEvents for already-existing hooks?
 	# - question: translations? Looks like only a few things are translated in the jinja2 file
@@ -392,7 +393,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					for customEvent in customEvents:
 						if customEvent["name"] != event: continue
 
-						message = customEvent["message"] #Todo: I think this is where we need to scope down the payload (if needed)
+						topic = "Custom Event"
+						message = scope_payload(customEvent["message"]) if customEvent["message"][0] == "." else customEvent["message"]
 						skipProcessing = False
 						break
 
@@ -603,6 +605,17 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		return line
 
 		# Private functions - Print Job Notifications
+
+    def scope_payload(self, payload, value):
+        to_thunk = lambda x: lambda: x
+
+        if value[0] == ".":
+			if value[1:]:
+                return to_thunk(payload[value[1:]])
+            else:
+                return to_thunk(payload)
+
+        return to_thunk(value)
 
 	# Create an image by getting an image from the setting webcam-snapshot.
 	# Transpose this image according the settings and returns it
