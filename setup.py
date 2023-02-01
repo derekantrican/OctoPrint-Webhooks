@@ -14,17 +14,17 @@ plugin_package = "octoprint_webhooks"
 plugin_name = "OctoPrint-Webhooks"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "3.0.3"
+plugin_version = "3.1.3"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
 plugin_description = """When certain events occur, a custom webhook will be sent to anywhere you want!"""
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
-plugin_author = "Blane Townsend"
+plugin_author = "Derek Antrican"
 
 # The plugin's author's mail address.
-plugin_author_email = "blane.townsend@gmail.com"
+plugin_author_email = "derekantrican@gmail.com"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
 plugin_url = "https://github.com/derekantrican/OctoPrint-Webhooks"
