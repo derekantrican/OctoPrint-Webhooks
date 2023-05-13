@@ -1,6 +1,6 @@
 {% assets "js_client" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
-<script src="{{ url_for("static", filename="js/lib/jquery/jquery.min.js") }}"></script>
-<script src="{{ url_for("static", filename="js/lib/lodash.min.js") }}"></script>
+<script src="{{ url_for('static', filename='js/lib/jquery/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/lib/lodash.min.js') }}"></script>
 
 <h2>Webhooks</h2>
 <form class="form-horizontal">
@@ -21,7 +21,7 @@
                         <span class="webhookDisabledTag" data-bind="css: { 'hideElement' : webhook_enabled() }">Disabled</span>
                         <span class="webhookOAuthTag" data-bind="css: { 'hideElement' : !oauth() }">OAuth</span>
                         <!-- URL -->
-                        <span css="text-overflow:ellipsis;" data-bind="text: url().length == 0 ? 'New Webhook' : url()" }></span>
+                        <span css="text-overflow:ellipsis;" data-bind="text: url().length == 0 ? 'New Webhook' : url()"></span>
 
                         <br/>
                         <!-- EVENTS -->
