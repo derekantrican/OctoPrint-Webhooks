@@ -51,6 +51,16 @@ $(function() {
             }
         }
 
+        self.onSettingsShown = function () { 
+            // Once the settings are saved, the selectedHook will no longer be the same as
+            // settings.settings.plugins.webhooks.hooks()[self.selectedIndex()] (because
+            // new observables are created with the new settings values). So before the
+            // settings window is shown, we'll re-assign the selectedHook
+            self.selectHook(self.selectedIndex());
+
+            //Todo: is this what was intended by some of the code in onBeforeBinding? Should investigate
+        }
+
         self.templateChanged = function(data) {
             self.templateActivated(false)
             self.templateDescription(self.template()["_description"])
@@ -232,7 +242,7 @@ $(function() {
 				console.log('PLUGS - Ignoring '+plugin);
                 return;
             }
-            
+
             hide = true
             if (data["hide"] !== undefined) {
                 hide = data["hide"]
