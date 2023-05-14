@@ -21,6 +21,7 @@ def is_string(unicode_or_str):
 	else:
 		if type(unicode_or_str) is unicode or type(unicode_or_str) is str:
 			is_string = True
+			
 	return is_string
 
 # Replaces any v in data that start with @param
@@ -32,6 +33,7 @@ def replace_dict_with_data(d, v):
 	looping_over = d
 	if type(d) is list:
 		looping_over = range(0, len(d))
+		
 	for key in looping_over:
 		value = d[key]
 		if type(value) is dict:
@@ -42,13 +44,17 @@ def replace_dict_with_data(d, v):
 				start_index = d[key].find("@")
 				# Find the end text by space
 				end_index = d[key].find(" ", start_index)
+
 				if end_index == -1:
 					end_index = len(d[key])
+
 				value_key = d[key][start_index + 1:end_index]
+
 				# Check for dot notation
 				components = value_key.split(".")
 				current_v = v
 				comp_found = True
+
 				for ic in range(0, len(components)):
 					comp = components[ic]
 					if comp in current_v:
@@ -56,14 +62,19 @@ def replace_dict_with_data(d, v):
 					else:
 						comp_found = False
 						break
+
 				if not comp_found:
 					current_v = ""
+
 				if start_index == 0 and end_index == len(d[key]):
 					d[key] = current_v
+
 				else:
 					d[key] = d[key].replace(d[key][start_index:end_index], str(current_v))
+
 		elif type(value) is list:
 			d[key] = replace_dict_with_data(value, v)
+
 	return d
 
 # Replaces any @param in the url with data inside the dictionary.
@@ -74,23 +85,30 @@ def replace_url_with_data(url, data):
 		start_index = value.find("@")
 		# Find the end text by space
 		end_index1 = value.find("/", start_index)
+
 		if end_index1 == -1:
 			end_index1 = len(value)
+
 		end_index2 = value.find(" ", start_index)
 		if end_index2 == -1:
 			end_index2 = len(value)
+
 		end_index3 = value.find("?", start_index)
 		if end_index3 == -1:
 			end_index3 = len(value)
+
 		end_index4 = value.find("#", start_index)
 		if end_index4 == -1:
 			end_index4 = len(value)
+
 		end_index = min(end_index1, end_index2, end_index3, end_index4)
 		value_key = value[start_index + 1:end_index]
+
 		# Check for dot notation
 		components = value_key.split(".")
 		current_v = data
 		comp_found = True
+
 		for ic in range(0, len(components)):
 			comp = components[ic]
 			if comp in current_v:
@@ -98,12 +116,15 @@ def replace_url_with_data(url, data):
 			else:
 				comp_found = False
 				break
+
 		if not comp_found:
 			current_v = ""
+
 		if start_index == 0 and end_index == len(value):
 			value = current_v
 		else:
 			value = value.replace(value[start_index:end_index], str(current_v))
+
 	return value
 
 # Checks for the name/value pair to make sure it matches
@@ -115,8 +136,10 @@ def check_for_header(headers, name, value):
 			is_set = True
 			if value.lower() not in headers[key].lower():
 				headers[key] = value
+
 	if not is_set:
 		headers[name] = value
+
 	return headers
 
 # Any inner dictionaries will be json encoded so that they can be passed correctly
@@ -129,7 +152,6 @@ def inner_json_encode(data):
 	except Exception as e:
 		print(str(e))
 	return data
-
 
 class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin, octoprint.plugin.SettingsPlugin,
 					 octoprint.plugin.EventHandlerPlugin, octoprint.plugin.AssetPlugin, octoprint.plugin.SimpleApiPlugin,
@@ -153,10 +175,6 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		)
 
 	# Todo notes for customEvents:
-	# - there's some issue with saving settings. It seems to only respect the first change after a restart.
-	#   So in order to change the customEvent message (for example) you need to restart octprint, go to settings,
-	#   make your change, and click save. If you make another change after this & click save it won't be respected
-	#   (even though the settings UI will show the new value - it isn't actually saved).
 	# - later: will need to add docs to README (and update README link in jinja2 file)
 	# - question: does there need to be a "migrate" to initialize [] for customEvents for already-existing hooks?
 	# - question: translations? Looks like only a few things are translated in the jinja2 file
@@ -168,8 +186,10 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 	def migrate_settings(self):
 		settings_version = self._settings.get(["settings_version"])
+
 		if settings_version == 1:
 			self._logger.info("Migrating settings from v1 to v2")
+
 			# create a hook with the current params and add it to the list
 			hook_params = ["url", "apiSecret", "deviceIdentifier", "eventPrintStarted", "eventPrintDone",
 						   "eventPrintFailed", "eventPrintPaused", "eventUserActionNeeded", "eventError",
@@ -178,11 +198,14 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						   "eventUserActionNeededMessage", "eventPrintProgressMessage", "eventErrorMessage",
 						   "headers", "data", "http_method", "content_type", "oauth", "oauth_url", "oauth_headers",
 						   "oauth_data", "oauth_http_method", "oauth_content_type", "test_event", "webhook_enabled"]
+			
 			hooks = self._settings.get(["hooks"])
 			hook = dict()
+
 			for i in range(0, len(hook_params)):
 				key = hook_params[i]
 				hook[key] = self._settings.get([key])
+
 			# now store the hook
 			self._logger.info("New Hook: " + str(hook))
 			hooks = [hook]
@@ -190,9 +213,6 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			self._settings.set(["settings_version"], 2)
 			self._settings.save()
 			self._logger.info("Hooks: " + str(self._settings.get(["hooks"])))
-		# self._settings.set(["hooks"], [])
-		# self._settings.set(["settings_version"], 1)
-		# self._settings.save()
 
 
 	def get_settings_defaults(self):
@@ -245,6 +265,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		if self.last_print_progress > progress:
 			self.last_print_progress = -1
 			self.last_print_progress_milestones = []
+		
 		# Get the settings
 		hooks = self._settings.get(["hooks"])
 		for hook_index in range(0, len(hooks)):
@@ -252,21 +273,27 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			active = hook["event_print_progress"]
 			event_print_progress_interval = hook["event_print_progress_interval"]
 			#self._logger.info("Print Progress" + storage + " - " + path + " - {0}".format(progress) + " - hook_index:{0}".format(hook_index) + " - active:{0}".format(active))
+
 			if active:
 				try:
 					interval = int(event_print_progress_interval)
+
 					# Now loop over all the missed progress events and see if they match
 					for p in range(self.last_print_progress + 1, progress + 1):
 						if p % interval == 0 and p != 0 and p != 100:
+
 							# Send the event for print progress
 							if len(self.last_print_progress_milestones) > hook_index:
 								self.last_print_progress_milestones[hook_index] = p
 							else:
 								self.last_print_progress_milestones.append(p)
+							
 							#self._logger.info("Fire Print Progress Event {0}".format(p))
 							eventManager().fire(Events.PLUGIN_WEBHOOKS_PROGRESS)
+
 					# Update the last print progress
 					self.last_print_progress = progress
+
 				except Exception as e:
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=True, msg="Invalid Setting for PRINT PROGRESS INTERVAL please use a number without any special characters instead of " + event_print_progress_interval))
 					continue
@@ -283,6 +310,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			event_name = ""
 			if "event" in data:
 				event_name = data["event"]
+
 			if event_name == "plugin_webhooks_progress":
 				hooks = self._settings.get(["hooks"])
 				for hook_index in range(0, len(hooks)):
@@ -290,6 +318,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						self.last_print_progress_milestones[hook_index] = 50
 					else:
 						self.last_print_progress_milestones.append(50)
+
 			event_data = {
 				"name": "example.gcode",
 				"path": "example.gcode",
@@ -299,8 +328,10 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				"time": 50.237335886,
 				"popup": True
 			}
+
 			if "hook_index" in data:
 				event_data["hook_index"] = int(data["hook_index"])
+
 			self.on_event(event_name, event_data)
 
 	# Returns a dictionary of the current job information
@@ -319,11 +350,14 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						metadata = {
 							"meta": meta
 						}
+
 						rd.update(metadata)
 					else:
 						self._logger.info("file does not exist at path")
+
 			# self._logger.info("getting job info" + json.dumps(rd))
 			return rd
+		
 		except Exception as e:
 			self._logger.info("get_job_information exception: " + str(e))
 			return {}
@@ -337,12 +371,14 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 		if payload is None:
 			payload = {}
+
 		hooks = self._settings.get(["hooks"])
 		for hook_index in range(0, len(hooks)):
 			hook = hooks[hook_index]
 			if "hook_index" in payload and payload["hook_index"] != hook_index:
 				# This is a test webhook that only needs to be sent to one hook.
 				continue
+
 			if "webhook_enabled" in hook and not hook["webhook_enabled"]:
 				# Hook not enabled. Need to continue on to the next hook.
 				if "hook_index" in payload:
@@ -360,6 +396,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			extra = payload
 			self._logger.info(f"event: {event}") # temp for debugging
 			self._logger.info(f"payload: {payload}") # temp for debugging
+
 			# 0) Determine the topic and message parameters and if we are parsing this event.
 			if event == Events.PRINT_STARTED and hook["eventPrintStarted"]:
 				topic = "Print Started"
@@ -417,9 +454,11 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					parsed_oauth_headers = 2
 					oauth_http_method = hook["oauth_http_method"]
 					oauth_content_type = hook["oauth_content_type"]
+					
 					# 1.2) Send the request
 					self._logger.info("Sending OAuth Request")
 					response = ""
+
 					if oauth_http_method == "GET":
 						response = requests.get(oauth_url, params=oauth_data, headers=oauth_headers)
 					else:
@@ -435,9 +474,11 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 							# self._logger.info("oauth headers: " + json.dumps(oauth_headers) + " - data: " + json.dumps(oauth_data))
 							# self._logger.info("oauth_http_method: " + oauth_http_method + " - oauth_content_type: " + oauth_content_type)
 							response = requests.request(oauth_http_method, oauth_url, data=oauth_data, headers=oauth_headers, timeout=30)
+					
 					# 1.3) Check to make sure we got a valid response code.
 					self._logger.info("OAuth Response: " + " - " + response.text)
 					code = response.status_code
+
 					if 200 <= code < 400:
 						oauth_result = response.json()
 						oauth_passed = True
@@ -445,6 +486,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					else:
 						self._logger.info("Invalid OAuth Response Code %s" % code)
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=False, msg="Invalid OAuth Response: " + response.text))
+
 				except requests.exceptions.RequestException as e:
 					self._logger.info("OAuth API Error: " + str(e))
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="OAuth API Error: " + str(e)))
@@ -458,13 +500,16 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					else:
 						self._logger.info("Unknown OAuth Issue: " + str(e))
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="Unknown Issue when trying to call OAUTH API."))
+
 			else:
 				oauth_passed = True
+
 			# Make sure we passed the oauth check
 			if not oauth_passed:
 				# Oauth not passed
 				self._logger.info("Not sending request - OAuth not passed")
 				continue
+
 			# Send the notification
 			# 2) Call the API
 			parsed_headers = 0
@@ -478,10 +523,13 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				parsed_headers = 2
 				http_method = hook["http_method"]
 				content_type = hook["content_type"]
+
 				# 2.1) Create a dictionary of all possible replacement variables.
 				values = {}
+
 				if extra is dict:
 					values = extra
+
 				values2 = {
 					"topic": topic,
 					"message": message,
@@ -492,23 +540,29 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					"percentCompleteMilestone": percent_complete_milestone
 				}
 				values.update(values2)
+
 				# 2.2) Get the current job information from the API
 				job_values = {}
 				job_keys = ["state", "job", "currentZ", "progress", "offsets", "meta"]
+
 				for jit in range(0, len(job_keys)):
 					if job_keys[jit] in job_info:
 						job_values[job_keys[jit]] = job_info[job_keys[jit]]
+
 				values.update(job_values)
+
 				# 2.3) Get a snapshot image if necessary
 				uploading_file = False
 				try_to_upload_file = False
 				uploading_file_name = ""
+
 				for uk in data:
 					if data[uk] == "@snapshot":
 						try_to_upload_file = True
 						uploading_file = True
 						uploading_file_name = uk
 						break
+
 				if uploading_file:
 					del data[uploading_file_name]
 					# Try to get a snapshot if necessary
@@ -518,8 +572,10 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						self._logger.info("snapshot retrieved")
 					else:
 						uploading_file = False
+
 				# 2.4) Merge these values with the oauth values.
 				values.update(oauth_result)
+
 				# 2.5) Replace the data and header elements that start with @
 				data = replace_dict_with_data(data, values)
 				headers = replace_dict_with_data(headers, values)
@@ -527,6 +583,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				self._logger.info(f"url: {url}") # temp for debugging
 				self._logger.info(f"values: {values}") # temp for debugging
 				self._logger.info(f"data: {data}") # temp for debugging
+
 				# 2.6) Send the request
 				response = ""
 				if http_method == "GET":
@@ -539,8 +596,10 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						for hk in headers:
 							if "content-type" in hk.lower():
 								to_remove.append(hk)
+
 						for el in to_remove:
 							del headers[el]
+
 						# We need to inner json_encode any dictionaries and arrays.
 						data = inner_json_encode(data)
 						self._logger.info("headers: " + json.dumps(headers))
@@ -550,8 +609,10 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						files = {
 							uploading_file_name: ("snapshot.jpg", snap, "image/jpeg")
 						}
+
 						# No timeout when uploading file as this could take some time.
 						response = requests.request(http_method, url, files=files, data=data, headers=headers)
+
 					elif content_type == "JSON":
 						# Make sure the Content-Type header is set to application/json
 						headers = check_for_header(headers, "content-type", "application/json")
@@ -559,6 +620,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						self._logger.info("data: " + json.dumps(data))
 						self._logger.info("http_method: " + http_method + " - content_type: " + content_type)
 						response = requests.request(http_method, url, json=data, headers=headers, timeout=30)
+
 					else:
 						# Make sure the Content-Type header is set to application/x-www-form-urlencoded
 						headers = check_for_header(headers, "content-type", "application/x-www-form-urlencoded")
@@ -568,17 +630,22 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						self._logger.info("data: " + json.dumps(data))
 						self._logger.info("http_method: " + http_method + " - content_type: " + content_type)
 						response = requests.request(http_method, url, data=data, headers=headers, timeout=30)
+
 				self._logger.info("Response: " + response.text)
+				
 				# Try to parse the response if possible.
 				code = response.status_code
+
 				if 200 <= code < 400:
 					self._logger.info("API SUCCESS: " + event + " " + response.text)
 					# Optionally show a message of success if the payload has popup=True
 					if type(payload) is dict and "popup" in payload:
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="success", hide=True, msg="Response: " + response.text))
+
 				else:
 					self._logger.info("API Bad Response Code: %s" % code)
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=False, msg="Invalid API Response: " + response.text))
+
 			except requests.exceptions.RequestException as e:
 				self._logger.info("API ERROR: " + str(e))
 				self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="API Error: " + str(e)))
@@ -628,6 +695,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		vflip = self._settings.global_get(["webcam", "flipV"])
 		rotate = self._settings.global_get(["webcam", "rotate90"])
 		self._logger.info("Snapshot URL: " + str(snapshot_url))
+		
 		if type(snapshot_url) is not str:
 			return None
 
