@@ -2,7 +2,6 @@ $(function() {
     function WebhookSettingsCustomViewModel(parameters) {
         var self = this
         self.settings = parameters[0]
-        self.hooks = ko.observableArray();
         self.selectedHook = ko.observable();
         self.selectedIndex = ko.observable(-1);
 
@@ -26,7 +25,6 @@ $(function() {
         }
 
         self.onBeforeBinding = function() {
-            self.hooks(self.settings.settings.plugins.webhooks.hooks())
             //Select the first hook. There should always be a selected hook.
             self.selectHook(0)
             //Get the list of available templates.
@@ -120,14 +118,16 @@ $(function() {
         }
 
         self.selectHook = function(index) {
-            if (self.hooks().length > index) {
+            if (self.settings.settings.plugins.webhooks.hooks().length > index) {
                 self.selectedIndex(index)
                 self.selectedHook(self.settings.settings.plugins.webhooks.hooks()[index])
                 //console.log("HOOKS", self.hooks(), self.hooks()[index])
                 //console.log("SELECTED HOOK IS SET", self.selectedHook())
-            } else if (self.hooks().length > 0) {
+            }
+            else if (self.settings.settings.plugins.webhooks.hooks().length > 0) {
                 self.selectHook(0)
-            } else {
+            }
+            else {
                 self.selectedIndex(-1)
             }
         }
