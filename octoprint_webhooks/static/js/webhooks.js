@@ -27,21 +27,23 @@ $(function() {
         self.onBeforeBinding = function() {
             //Select the first hook. There should always be a selected hook.
             self.selectHook(0)
+
             //Get the list of available templates.
             let templates = ["simple.json", "fulldata.json", "snapshot.json",
             "oauth.json", "dotnotation.json", "slack.json", "plivo.json", "alexa_notify_me.json"]
             let callbacksLeft = templates.length;
+
             for (let i = 0; i < templates.length; i = i + 1) {
                 let templateFile = "plugin/webhooks/static/templates/" + templates[i]
                 console.log("loading template" + templates[i])
+
                 $.getJSON(templateFile, function(data) {
                     console.log("json file: ", data)
                     self.availableTemplates.push(data)
-                    //console.log("available templates: ", self.availableTemplates())
+
                     callbacksLeft -= 1;
                     if (callbacksLeft == 0) {
                         self.template(self.availableTemplates()[0])
-                        //console.log("selected template: ", self.template())
                     }
                 }).fail(function(jqxhr, textStatus, error) {
                     console.log("Failed to get the template for " + templateFile, jqxhr, textStatus, error)
@@ -57,9 +59,11 @@ $(function() {
         self.activateTemplate = function() {
             console.log(self.template())
             self.templateActivated(true)
+
             //Loop over keys in the template and set only those keys in the template on the current hook.
             let td = self.template()
             let data = self.selectedHook()
+
             for (let prop in td) {
                 if (prop in data) {
                     console.log("setting prop", prop, td[prop])
@@ -84,6 +88,7 @@ $(function() {
             delete data["eventError"]
             delete data["event_print_progress"]
             delete data["__ko_mapping__"]
+
             if (data["oauth"] == false) {
                 delete data["oauth_url"]
                 delete data["oauth_headers"]
@@ -91,23 +96,30 @@ $(function() {
                 delete data["oauth_http_method"]
                 delete data["oauth_content_type"]
             }
+
             data["_name"] = "TODO: FILL THIS OUT. SHOULD BE LESS THAN 30 CHARACTERS. WILL SHOW UP IN THE TEMPLATE SELECT BOX. SOMETHING LIKE 'Slack Message - v1'."
             data["_description"] = "TODO: FILL THIS OUT. THIS WILL SHOW WHEN YOUR TEMPLATE HAS BEEN SELECTED. SHOULD EXPLAIN WHAT THE TEMPLATE IS, HOW TO USE IT, AND ANYTHING ELSE NECESSARY."
+
             self.templateData("data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)))
             document.getElementById("templateDownloadA").click()
         }
 
         self.foldSection = function(section) {
             console.log("foldSection: ", section)
+
             if (section == "templates") {
                 self.foldTemplates(!self.foldTemplates())
-            } else if (section == "webhookParameters") {
+            }
+            else if (section == "webhookParameters") {
                 self.foldWebhookParameters(!self.foldWebhookParameters())
-            } else if (section == "events") {
+            }
+            else if (section == "events") {
                 self.foldEvents(!self.foldEvents())
-            } else if (section == "advanced") {
+            }
+            else if (section == "advanced") {
                 self.foldAdvanced(!self.foldAdvanced())
-            } else if (section == "oAuth") {
+            }
+            else if (section == "oAuth") {
                 self.foldOAuth(!self.foldOAuth())
             }
         }
@@ -121,8 +133,6 @@ $(function() {
             if (self.settings.settings.plugins.webhooks.hooks().length > index) {
                 self.selectedIndex(index)
                 self.selectedHook(self.settings.settings.plugins.webhooks.hooks()[index])
-                //console.log("HOOKS", self.hooks(), self.hooks()[index])
-                //console.log("SELECTED HOOK IS SET", self.selectedHook())
             }
             else if (self.settings.settings.plugins.webhooks.hooks().length > 0) {
                 self.selectHook(0)
@@ -133,12 +143,10 @@ $(function() {
         }
 
         self.editHook = function(index) {
-            //console.log("Edit Hook", index)
             self.selectHook(index)
         }
 
         self.removeHook = function(data) {
-            //console.log("Remove Hook", data)
             self.settings.settings.plugins.webhooks.hooks.remove(data)
             self.selectHook(0)
         }
@@ -186,6 +194,7 @@ $(function() {
                 'oauth_content_type': ko.observable("JSON"),
                 'test_event': ko.observable("PrintStarted"),
             })
+
             self.settings.settings.plugins.webhooks.hooks.push(self.selectedHook())
             self.selectedIndex(self.settings.settings.plugins.webhooks.hooks().length - 1)
         }
@@ -223,10 +232,12 @@ $(function() {
 				console.log('PLUGS - Ignoring '+plugin);
                 return;
             }
+            
             hide = true
             if (data["hide"] !== undefined) {
                 hide = data["hide"]
             }
+
 			new PNotify({
 			    title: 'Webhooks',
                 text: data.msg,
@@ -237,11 +248,14 @@ $(function() {
 
         self.testWebhook = function(data) {
             var client = new OctoPrintClient()
+
             client.options.baseurl = "/"
             // 1) Save the user settings.
             data = ko.mapping.toJS(self.settings.settings.plugins.webhooks);
+
             console.log("WEBHOOKS - ", data)
             console.log("SELECT VALUE - ", self.selectedHook().test_event(), document.getElementById("selectTestEvent").value)
+
             return OctoPrint.settings.savePluginSettings("webhooks", data)
                 .done(function(data, status, xhr) {
                     //saved
