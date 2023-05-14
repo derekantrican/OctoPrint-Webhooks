@@ -1,3 +1,7 @@
+# *NOTE: this plugin has been abandoned by the original creator and adopted here by a new maintainer*
+
+For now, the below is preserved as the former README (except for a change to the setup URL)
+
 # OctoPrint-Webhooks
 
 This allows you to send a webhook (a.k.a. API Request) to any URL when certain events happen on OctoPrint such as when
@@ -14,7 +18,7 @@ I wrote a blog post to explain more about what this plugin is and why I built it
 Install via the bundled [Plugin Manager](https://docs.octoprint.org/en/master/bundledplugins/pluginmanager.html)
 or manually using this URL:
 
-    https://github.com/2blane/OctoPrint-Webhooks/archive/master.zip
+    https://github.com/derekantrican/OctoPrint-Webhooks/archive/master.zip
 
 Once you've installed the plugin, go to the settings page for this plugin. The page is called "Webhooks".
 Select which events will trigger a webhook, then change the following:

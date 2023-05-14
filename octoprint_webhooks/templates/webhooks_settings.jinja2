@@ -1,6 +1,6 @@
 {% assets "js_client" %}<script type="text/javascript" src="{{ ASSET_URL }}"></script>{% endassets %}
-<script src="{{ url_for("static", filename="js/lib/jquery/jquery.min.js") }}"></script>
-<script src="{{ url_for("static", filename="js/lib/lodash.min.js") }}"></script>
+<script src="{{ url_for('static', filename='js/lib/jquery/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/lib/lodash.min.js') }}"></script>
 
 <h2>Webhooks</h2>
 <form class="form-horizontal">
@@ -21,7 +21,7 @@
                         <span class="webhookDisabledTag" data-bind="css: { 'hideElement' : webhook_enabled() }">Disabled</span>
                         <span class="webhookOAuthTag" data-bind="css: { 'hideElement' : !oauth() }">OAuth</span>
                         <!-- URL -->
-                        <span css="text-overflow:ellipsis;" data-bind="text: url().length == 0 ? 'New Webhook' : url()" }></span>
+                        <span css="text-overflow:ellipsis;" data-bind="text: url().length == 0 ? 'New Webhook' : url()"></span>
 
                         <br/>
                         <!-- EVENTS -->
@@ -154,7 +154,7 @@
                     <br/>
                     2. Open up the json file, and fill out any remaining data ('_name' & '_description' at the bottom of the file).
                     <br/>
-                    3. Checkout the <a target="_blank" href="https://github.com/2blane/OctoPrint-Webhooks">source code</a> from GitHub.
+                    3. Checkout the <a target="_blank" href="https://github.com/derekantrican/OctoPrint-Webhooks">source code</a> from GitHub.
                     <br/>
                     4. Add your json file under octoprint_webhooks/static/templates.
                     <br/>
@@ -409,7 +409,7 @@
                 For instance, if above you set 'DEVICE IDENTIFIER' to "Blane's Printer", then @deviceIdentifer
                 will get replaced with "Blane's Printer" when the webhook request is made.
                 For a list of all possible parameters, see the
-                <a target="_blank" href="https://github.com/2blane/OctoPrint-Webhooks#advanced-configuration">README</a>.
+                <a target="_blank" href="https://github.com/derekantrican/OctoPrint-Webhooks#advanced-configuration">README</a>.
             </div>
             <label class="control-label">{{ _('HEADERS') }}</label>
             <div class="controls">

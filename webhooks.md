@@ -9,9 +9,9 @@ license: AGPLv3
 
 date: 2020-04-29
 
-homepage: https://github.com/2blane/OctoPrint-Webhooks
-source: https://github.com/2blane/OctoPrint-Webhooks
-archive: https://github.com/2blane/OctoPrint-Webhooks/archive/master.zip
+homepage: https://github.com/derekantrican/OctoPrint-Webhooks
+source: https://github.com/derekantrican/OctoPrint-Webhooks
+archive: https://github.com/derekantrican/OctoPrint-Webhooks/archive/master.zip
 
 tags:
 - webhook
