@@ -176,7 +176,6 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 	# Todo notes for customEvents:
 	# - question: does there need to be a "migrate" to initialize [] for customEvents for already-existing hooks?
-	# - question: translations? Looks like only a few things are translated in the jinja2 file
 
 	def on_after_startup(self):
 		self._logger.info("Hello World from WebhooksPlugin!")
