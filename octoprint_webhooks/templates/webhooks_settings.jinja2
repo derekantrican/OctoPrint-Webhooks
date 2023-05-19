@@ -346,6 +346,51 @@
             </div>
         </div>
 
+        <!-- ------------- -->
+        <!-- ------------- -->
+        <!-- CUSTOM EVENTS -->
+        <!-- ------------- -->
+        <!-- ------------- -->
+        <h4 class="control-header control-header-pushable" data-bind="click: function() { $root.foldSection('customEvents') }">
+            Custom Events
+            <span data-bind="css: { 'hideElement': $root.foldCustomEvents() }">▴</span>
+            <span data-bind="css: { 'hideElement': !$root.foldCustomEvents() }">▾</span>
+        </h4>
+
+        <div data-bind="css: { 'hideElement': $root.foldCustomEvents() }">
+            <div class="control-header-description">
+                Custom Events allow you to specify events to subscribe to that are triggered by other plugins.
+                For instance, the <a target="_blank" href="https://plugins.octoprint.org/plugins/ngrok">Ngrok Tunnel plugin</a> sends the
+                "plugin_ngrok_connected" event when the tunnel is created with information about the tunnel
+                address. OctoPrint also has some built-in events listed <a target="_blank" href="https://docs.octoprint.org/en/master/events/index.html#available-events">here</a>.
+                For more information about Custom Events, see the <a target="_blank" href="https://github.com/derekantrican/OctoPrint-Webhooks/tree/CustomEvents#custom-events">README</a>.
+            </div>
+            <table class="table">
+                <thead><tr>
+                    <th><span>Event Name</span></th>
+                    <th class="value"><span>Message</span></th>
+                    <th style="flex-shrink: 0; max-width: 37px;"></th>
+                </tr></thead>
+                <tbody>
+                    <!-- ko foreach: customEvents -->
+                    <tr data-bind="with: new $root.CustomEvent($data)">
+                        <td><input type="text" data-bind="value: name"></td>
+                        <td><input type="text" data-bind="value: message"></td>
+                        <td style="max-width: 37px;">
+                            <button class="btn btn-danger" title="Remove" data-bind="click: remove">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <!-- /ko -->
+                    <tr style="justify-content: flex-end;"><td style="overflow: visible; flex-grow: 0; padding: 0; border: 0;">
+                        <button class="btn btn-primary" title="Add new" data-bind="click: $root.newCustomEvent">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                </tbody>
+            </table>
+        </div>
+
         <!-- -------- -->
         <!-- -------- -->
         <!-- ADVANCED -->

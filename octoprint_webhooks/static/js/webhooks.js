@@ -1,6 +1,6 @@
 $(function() {
     function WebhookSettingsCustomViewModel(parameters) {
-        var self = this
+        var self = this, root = self;
         self.settings = parameters[0]
         self.selectedHook = ko.observable();
         self.selectedIndex = ko.observable(-1);
@@ -9,6 +9,7 @@ $(function() {
         self.foldTemplates = ko.observable(true)
         self.foldWebhookParameters = ko.observable(true)
         self.foldEvents = ko.observable(true)
+        self.foldCustomEvents = ko.observable(true)
         self.foldAdvanced = ko.observable(true)
         self.foldOAuth = ko.observable(true)
 
@@ -19,7 +20,21 @@ $(function() {
 
         self.templateActivated = ko.observable(false) // has the template been activated?
         self.templateDescription = ko.observable("no description") //the selected template's description
+        //Custom Events
+        self.newCustomEvent = () =>
+            root.selectedHook().customEvents.push({
+                name: ko.observable(''),
+                message: ko.observable('')
+            })
+            
+        self.CustomEvent = function(customEvent){
+            let self = this;
 
+            self.name = customEvent.name;
+            self.message = customEvent.message;
+            self.remove = () => root.selectedHook().customEvents.remove(customEvent);
+        }
+        
         self.onStartup = function() {
             console.log("WebhookSettingsCustomViewModel startup")
         }
@@ -126,6 +141,9 @@ $(function() {
             else if (section == "events") {
                 self.foldEvents(!self.foldEvents())
             }
+            else if (section == "customEvents") {
+                self.foldCustomEvents(!self.foldCustomEvents())
+            }
             else if (section == "advanced") {
                 self.foldAdvanced(!self.foldAdvanced())
             }
@@ -191,6 +209,8 @@ $(function() {
                 'eventUserActionNeededMessage': ko.observable("User action needed. You might need to change the filament color."),
                 'eventPrintProgressMessage': ko.observable("Your print is @percentCompleteMilestone % complete."),
                 'eventErrorMessage': ko.observable("There was an error."),
+
+                'customEvents': ko.computed(() => []),
 
                 'headers': ko.observable('{\n  "Content-Type": "application/json"\n}'),
                 'data': ko.observable('{\n  "deviceIdentifier":"@deviceIdentifier",\n  "apiSecret":"@apiSecret",\n  "topic":"@topic",\n  "message":"@message",\n  "extra":"@extra",\n  "state": "@state",\n  "job": "@job",\n  "progress": "@progress",\n  "currentZ": "@currentZ",\n  "offsets": "@offsets",\n  "meta": "@meta",\n  "currentTime": "@currentTime",\n  "snapshot": "@snapshot"\n}'),
