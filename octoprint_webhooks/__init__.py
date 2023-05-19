@@ -174,9 +174,6 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			)
 		)
 
-	# Todo notes for customEvents:
-	# - question: does there need to be a "migrate" to initialize [] for customEvents for already-existing hooks?
-
 	def on_after_startup(self):
 		self._logger.info("Hello World from WebhooksPlugin!")
 		# Update the settings if necessary
@@ -211,6 +208,18 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			self._settings.set(["settings_version"], 2)
 			self._settings.save()
 			self._logger.info("Hooks: " + str(self._settings.get(["hooks"])))
+
+		if settings_version == 2:
+			self._logger.info("Migrating settings from v2 to v3")
+
+			hooks = self._settings.get(["hooks"])
+			for hook_index in range(0, len(hooks)):
+				hook = hooks[hook_index]
+				hook["customEvents"] = []
+
+			self._settings.set(["hooks"], hooks)
+			self._settings.set(["settings_version"], 3)
+			self._settings.save()
 
 
 	def get_settings_defaults(self):
@@ -423,7 +432,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					# This is a test event - show a message to the user that they need to enable this event.
 					msg = "This event is disabled. Please enable the event %s to test." % event
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=False, msg=msg))
-				else:
+				elif "customEvents" in hook: # Don't check for customEvents before settings have been migrated
 					customEvents = hook["customEvents"]
 					for customEvent in customEvents:
 						if customEvent["name"].casefold() != event.casefold(): continue
