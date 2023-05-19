@@ -430,7 +430,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						if customEvent["name"].casefold() != event.casefold(): continue
 
 						topic = "Custom Event"
-						message = self.scope_payload(payload, customEvent["message"]) if customEvent["message"][0] == "." else customEvent["message"]
+						message = customEvent["message"]
 						skipProcessing = False
 						break
 
@@ -671,15 +671,6 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		return line
 
 		# Private functions - Print Job Notifications
-
-	def scope_payload(self, payload, value):
-		if value[0] == ".":
-			if value[1:]:
-				return payload[value[1:]]
-			else:
-				return payload
-
-		return value
 
 	# Create an image by getting an image from the setting webcam-snapshot.
 	# Transpose this image according the settings and returns it
