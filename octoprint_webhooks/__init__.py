@@ -175,7 +175,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		)
 
 	# Todo notes for customEvents:
-	# - later: will need to add docs to README (and update README link in jinja2 file)
+	# - event names should be case insensitive
 	# - question: does there need to be a "migrate" to initialize [] for customEvents for already-existing hooks?
 	# - question: translations? Looks like only a few things are translated in the jinja2 file
 
@@ -695,7 +695,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		vflip = self._settings.global_get(["webcam", "flipV"])
 		rotate = self._settings.global_get(["webcam", "rotate90"])
 		self._logger.info("Snapshot URL: " + str(snapshot_url))
-
+		
 		if type(snapshot_url) is not str:
 			return None
 
