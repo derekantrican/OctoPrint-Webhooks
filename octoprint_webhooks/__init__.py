@@ -6,6 +6,8 @@ import requests
 import time
 import sys
 
+from datetime import datetime, timedelta
+
 from io import BytesIO
 from PIL import Image
 
@@ -192,7 +194,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						   "eventPrintDoneMessage", "eventPrintFailedMessage", "eventPrintPausedMessage",
 						   "eventUserActionNeededMessage", "eventPrintProgressMessage", "eventErrorMessage",
 						   "headers", "data", "http_method", "content_type", "oauth", "oauth_url", "oauth_headers",
-						   "oauth_data", "oauth_http_method", "oauth_content_type", "test_event", "webhook_enabled"]
+						   "oauth_data", "oauth_http_method", "oauth_content_type", "test_event", "webhook_enabled",
+						   "event_cooldown"]
 			
 			hooks = self._settings.get(["hooks"])
 			hook = dict()
@@ -227,7 +230,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			hooks = self._settings.get(["hooks"])
 			for hook_index in range(0, len(hooks)):
 				hook = hooks[hook_index]
-				hook["eventCooldown"] = 0
+				hook["event_cooldown"] = 0
 
 			self._settings.set(["hooks"], hooks)
 			self._settings.set(["settings_version"], 4)
@@ -259,6 +262,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					oauth_content_type="JSON",
 					test_event="PrintStarted",
 					webhook_enabled=True,
+					event_cooldown=0,
 					settings_version=1,
 					hooks=[]
 					)
@@ -381,7 +385,11 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			self._logger.info("get_job_information exception: " + str(e))
 			return {}
 
+	event_times = {}
+
 	def on_event(self, event, payload):
+		last_event_time = self.event_times[event] if event in self.event_times else datetime.min
+
 		# A) Get all the data that only needs to be calculated once.
 		# A.1) Get the snapshot
 		snap = None
@@ -403,6 +411,14 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				if "hook_index" in payload:
 					# Display an error and tell the user to enable their webhook.
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=False, msg="Your webhook is disabled. Check the ENABLED box to test this webhook."))
+				continue
+
+			seconds_since_last_event = (datetime.now() - last_event_time).seconds
+			cooldown_seconds = int(hook["event_cooldown"]) if "event_cooldown" in hook else 0
+			if seconds_since_last_event < cooldown_seconds:
+				# Todo: in the future we could also check payload for similarity and allow if the payload is different
+				# (though if the payload contains something like a timestamp, it will always be different)
+				self._logger.info("Skipping event '%s' (last event %s seconds ago - cooldown of %s seconds not elapsed)" % (event, seconds_since_last_event, cooldown_seconds))
 				continue
 
 			# A.3) Get the last print complete milestone
@@ -651,6 +667,9 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						response = requests.request(http_method, url, data=data, headers=headers, timeout=30)
 
 				self._logger.info("Response: " + response.text)
+
+				# Log the event time for cooldown
+				self.event_times[event] = datetime.now()
 				
 				# Try to parse the response if possible.
 				code = response.status_code
