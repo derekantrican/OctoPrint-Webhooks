@@ -221,6 +221,18 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			self._settings.set(["settings_version"], 3)
 			self._settings.save()
 
+		if settings_version == 3:
+			self._logger.info("Migrating settings from v3 to v4")
+			
+			hooks = self._settings.get(["hooks"])
+			for hook_index in range(0, len(hooks)):
+				hook = hooks[hook_index]
+				hook["eventCooldown"] = 0
+
+			self._settings.set(["hooks"], hooks)
+			self._settings.set(["settings_version"], 4)
+			self._settings.save()
+
 
 	def get_settings_defaults(self):
 		return dict(url="", apiSecret="", deviceIdentifier="",
