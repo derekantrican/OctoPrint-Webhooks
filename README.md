@@ -19,6 +19,10 @@ Select which events will trigger a webhook, then change the following:
 #### URL
 The url that will be called when an event occurs such as https://www.myapi.com/v1/method
 
+#### EVENT COOLDOWN
+
+_Optionally, you can specify a "cooldown" for events, restricting how often the same event can fire (this will greatly reduce the amount of spam from some events such as "User Action Needed")_
+
 #### HTTP METHOD
 The type of HTTP request to make... Usually this is POST.
 
