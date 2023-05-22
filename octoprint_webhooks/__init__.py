@@ -671,7 +671,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 				self._logger.info("Response: " + response.text)
 
-				# Log the event time for cooldown
+				# Log the event time for cooldown (do it here so we're only keeping track of events that the
+				# user is actually subscribed to - actually sending a request)
 				self.event_times[event] = datetime.now()
 				
 				# Try to parse the response if possible.
