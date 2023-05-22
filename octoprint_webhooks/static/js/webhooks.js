@@ -189,6 +189,7 @@ $(function() {
         self.newHook = function() {
             self.selectedHook({
                 'url': ko.observable(''),
+                'event_cooldown': ko.observable(0),
                 'apiSecret': ko.observable(''),
                 'deviceIdentifier': ko.observable(''),
                 'webhook_enabled': ko.observable(true),
