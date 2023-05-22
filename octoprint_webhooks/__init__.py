@@ -6,7 +6,7 @@ import requests
 import time
 import sys
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from io import BytesIO
 from PIL import Image
@@ -182,9 +182,11 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		self.migrate_settings()
 
 	def migrate_settings(self):
-		settings_version = self._settings.get(["settings_version"])
+		# Repeatedly checking 'self._settings.get(["settings_version"])' allows us to "recursively" migrate
+		# the settings (eg a user is on settings_version 2, and we can upgrade them all the way to the latest
+		# with a single call of this method - avoiding multiple restarts of Octoprint)
 
-		if settings_version == 1:
+		if self._settings.get(["settings_version"]) == 1:
 			self._logger.info("Migrating settings from v1 to v2")
 
 			# create a hook with the current params and add it to the list
@@ -212,7 +214,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			self._settings.save()
 			self._logger.info("Hooks: " + str(self._settings.get(["hooks"])))
 
-		if settings_version == 2:
+		if self._settings.get(["settings_version"]) == 2:
 			self._logger.info("Migrating settings from v2 to v3")
 
 			hooks = self._settings.get(["hooks"])
@@ -224,7 +226,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			self._settings.set(["settings_version"], 3)
 			self._settings.save()
 
-		if settings_version == 3:
+		if self._settings.get(["settings_version"]) == 3:
 			self._logger.info("Migrating settings from v3 to v4")
 			
 			hooks = self._settings.get(["hooks"])
@@ -238,6 +240,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 
 	def get_settings_defaults(self):
+		# Todo: settings defaults should be updated for latest settings format (not settings_version 1)
 		return dict(url="", apiSecret="", deviceIdentifier="",
 					eventPrintStarted=True, eventPrintDone=True, eventPrintFailed=True, eventPrintPaused=True,
 					eventUserActionNeeded=True, eventError=True,
