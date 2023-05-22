@@ -240,35 +240,43 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 
 	def get_settings_defaults(self):
-		# Todo: settings defaults should be updated for latest settings format (not settings_version 1)
-		return dict(url="", apiSecret="", deviceIdentifier="",
-					eventPrintStarted=True, eventPrintDone=True, eventPrintFailed=True, eventPrintPaused=True,
-					eventUserActionNeeded=True, eventError=True,
-					event_print_progress=False, event_print_progress_interval="50",
-					eventPrintStartedMessage="Your print has started.",
-					eventPrintDoneMessage="Your print is done.",
-					eventPrintFailedMessage="Something went wrong and your print has failed.",
-					eventPrintPausedMessage="Your print has paused. You might need to change the filament color.",
-					eventUserActionNeededMessage="User action needed. You might need to change the filament color.",
-					eventPrintProgressMessage="Your print is @percentCompleteMilestone % complete.",
-					eventErrorMessage="There was an error.",
-					customEvents=[],
-					headers='{\n  "Content-Type": "application/json"\n}',
-					data='{\n  "deviceIdentifier":"@deviceIdentifier",\n  "apiSecret":"@apiSecret",\n  "topic":"@topic",\n  "message":"@message",\n  "extra":"@extra",\n  "state": "@state",\n  "job": "@job",\n  "progress": "@progress",\n  "currentZ": "@currentZ",\n  "offsets": "@offsets",\n  "meta": "@meta",\n  "currentTime": "@currentTime",\n  "snapshot": "@snapshot"\n}',
-					http_method="POST",
-					content_type="JSON",
-					oauth=False,
-					oauth_url="",
-					oauth_headers='{\n  "Content-Type": "application/json"\n}',
-					oauth_data='{\n  "client_id":"myClient",\n  "client_secret":"mySecret",\n  "grant_type":"client_credentials"\n}',
-					oauth_http_method="POST",
-					oauth_content_type="JSON",
-					test_event="PrintStarted",
-					webhook_enabled=True,
-					event_cooldown=0,
-					settings_version=1,
-					hooks=[]
-					)
+		return dict(
+			hooks = [dict(
+				url = "",
+				apiSecret = "",
+				deviceIdentifier = "",
+				eventPrintStarted = True,
+				eventPrintDone = True,
+				eventPrintFailed = True,
+				eventPrintPaused = True,
+				eventUserActionNeeded = True,
+				eventError = True,
+				event_print_progress = False,
+				event_print_progress_interval = "50",
+				eventPrintStartedMessage = "Your print has started.",
+				eventPrintDoneMessage = "Your print is done.",
+				eventPrintFailedMessage = "Something went wrong and your print has failed.",
+				eventPrintPausedMessage = "Your print has paused. You might need to change the filament color.",
+				eventUserActionNeededMessage = "User action needed. You might need to change the filament color.",
+				eventPrintProgressMessage = "Your print is @percentCompleteMilestone % complete.",
+				eventErrorMessage = "There was an error.",
+				customEvents = [],
+				headers = '{\n  "Content-Type"= "application/json"\n}',
+				data = '{\n  "deviceIdentifier":"@deviceIdentifier",\n  "apiSecret":"@apiSecret",\n  "topic":"@topic",\n  "message":"@message",\n  "extra":"@extra",\n  "state": "@state",\n  "job": "@job",\n  "progress": "@progress",\n  "currentZ": "@currentZ",\n  "offsets": "@offsets",\n  "meta": "@meta",\n  "currentTime": "@currentTime",\n  "snapshot": "@snapshot"\n}',
+				http_method = "POST",
+				content_type = "JSON",
+				oauth = False,
+				oauth_url = "",
+				oauth_headers = '{\n  "Content-Type": "application/json"\n}',
+				oauth_data = '{\n  "client_id":"myClient",\n  "client_secret":"mySecret",\n  "grant_type":"client_credentials"\n}',
+				oauth_http_method = "POST",
+				oauth_content_type = "JSON",
+				test_event = "PrintStarted",
+				webhook_enabled = True,
+				event_cooldown = 0,
+			)],
+			settings_version = 4
+		)
 
 	def get_template_configs(self):
 		return [
