@@ -287,8 +287,16 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		return dict(
 			css=["css/webhooks.css"],
 			js=["js/webhooks.js"],
-			json=["templates/simple.json", "templates/fulldata.json", "templates/snapshot.json",
-				  "templates/oauth.json", "templates/dotnotation.json", "templates/slack.json", "templates/plivo.json", "templates/alexa_notify_me.json"]
+			json=[
+				"templates/simple.json",
+				"templates/fulldata.json",
+				"templates/snapshot.json",
+				"templates/oauth.json",
+				"templates/dotnotation.json",
+				"templates/slack.json",
+				"templates/plivo.json",
+				"templates/alexa_notify_me.json"
+			]
 		)
 
 	def register_custom_events(self, *args, **kwargs):
@@ -334,7 +342,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 	def get_api_commands(self):
 		return dict(
-			testhook=[]
+			testhook=[],
+			savehooks=[]
 		)
 
 	def on_api_command(self, command, data):
@@ -367,6 +376,13 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				event_data["hook_index"] = int(data["hook_index"])
 
 			self.on_event(event_name, event_data)
+		elif command == "savehooks":
+			self._logger.info("savesettings")
+			if "settings" in data and "hooks" in data["settings"]:
+				self._settings.set(["hooks"], data["settings"]["hooks"])
+				self._logger.info("Updated hooks")
+			else:
+				self._logger.info("Unable to update hooks - invalid data")
 
 	# Returns a dictionary of the current job information
 	def get_job_information(self):

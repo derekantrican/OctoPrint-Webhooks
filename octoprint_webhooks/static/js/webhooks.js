@@ -281,25 +281,36 @@ $(function() {
             var client = new OctoPrintClient()
 
             client.options.baseurl = "/"
-            // 1) Save the user settings.
+            // Save the user settings.
             data = ko.mapping.toJS(self.settings.settings.plugins.webhooks);
 
             console.log("WEBHOOKS - ", data)
             console.log("SELECT VALUE - ", self.selectedHook().test_event(), document.getElementById("selectTestEvent").value)
 
-            return OctoPrint.settings.savePluginSettings("webhooks", data)
-                .done(function(data, status, xhr) {
-                    //saved
-                    console.log("settings saved")
-                    // 2) Send a test event to the python backend.
-                    event = self.selectedHook().test_event()
-                    console.log("TEST EVENT - ", event)
-                    client.postJson("api/plugin/webhooks", {"command":"testhook", "event":event, "hook_index": self.selectedIndex()})
+            // Save the current settings (we go through an api call to the python code
+            // instead of calling OctoPrint.settings.savePluginSettings because using
+            // the latter will trigger a settings conflict
+            // https://github.com/derekantrican/OctoPrint-Webhooks/issues/8)
+            return client.postJson("api/plugin/webhooks", {
+                "command" : "savehooks",
+                "settings" : data
+            })
+            .done(() => {
+                //saved
+                console.log("settings saved")
+                // Send a test event to the python backend.
+                var eventName = self.selectedHook().test_event() // Todo: there's not really a reason why test_event needs to be a hook property
+                console.log("TEST EVENT - ", eventName)
+                client.postJson("api/plugin/webhooks", {
+                    "command" : "testhook",
+                    "event" : eventName,
+                    "hook_index" : self.selectedIndex()
                 })
-                .fail(function(xhr, status, error) {
-                    //failed to save
-                    console.log("failed to save settings")
-                })
+            })
+            .fail(() => {
+                //failed to save
+                console.log("failed to save settings")
+            })
 		}
     }
 
