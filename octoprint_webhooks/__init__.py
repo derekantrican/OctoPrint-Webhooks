@@ -197,7 +197,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						   "eventUserActionNeededMessage", "eventPrintProgressMessage", "eventErrorMessage",
 						   "headers", "data", "http_method", "content_type", "oauth", "oauth_url", "oauth_headers",
 						   "oauth_data", "oauth_http_method", "oauth_content_type", "test_event", "webhook_enabled",
-						   "event_cooldown"]
+						   "event_cooldown", "verify_ssl"]
 			
 			hooks = self._settings.get(["hooks"])
 			hook = dict()
@@ -237,7 +237,18 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			self._settings.set(["hooks"], hooks)
 			self._settings.set(["settings_version"], 4)
 			self._settings.save()
+		
+		if self._settings.get(["settings_version"]) == 4:
+			self._logger.info("Migrating settings from v4 to v5")
 
+			hooks = self._settings.get(["hooks"])
+			for hook_index in range(0, len(hooks)):
+				hook = hooks[hook_index]
+				hook["verify_ssl"] = True
+
+			self._settings.set(["hooks"], hooks)
+			self._settings.set(["settings_version"], 5)
+			self._settings.save()
 
 	def get_settings_defaults(self):
 		return dict(
@@ -261,6 +272,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				eventPrintProgressMessage = "Your print is @percentCompleteMilestone % complete.",
 				eventErrorMessage = "There was an error.",
 				customEvents = [],
+				verify_ssl = True,
 				headers = '{\n  "Content-Type":"application/json"\n}',
 				data = '{\n  "deviceIdentifier":"@deviceIdentifier",\n  "apiSecret":"@apiSecret",\n  "topic":"@topic",\n  "message":"@message",\n  "extra":"@extra",\n  "state": "@state",\n  "job": "@job",\n  "progress": "@progress",\n  "currentZ": "@currentZ",\n  "offsets": "@offsets",\n  "meta": "@meta",\n  "currentTime": "@currentTime",\n  "snapshot": "@snapshot"\n}',
 				http_method = "POST",
@@ -509,6 +521,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				parsed_oauth_headers = 0
 				try:
 					# 1.1) Get the request data and headers
+					verify_ssl = hook["verify_ssl"]
 					oauth_url = hook["oauth_url"]
 					oauth_headers = json.loads(hook["oauth_headers"])
 					parsed_oauth_headers = 1
@@ -522,20 +535,20 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					response = ""
 
 					if oauth_http_method == "GET":
-						response = requests.get(oauth_url, params=oauth_data, headers=oauth_headers)
+						response = requests.get(oauth_url, params=oauth_data, headers=oauth_headers, verify=verify_ssl)
 					else:
 						if oauth_content_type == "JSON":
 							# Make sure the Content-Type header is set to application/json
 							oauth_headers = check_for_header(oauth_headers, "content-type", "application/json")
 							# self._logger.info("oauth headers: " + json.dumps(oauth_headers) + " - data: " + json.dumps(oauth_data))
 							# self._logger.info("oauth_http_method: " + oauth_http_method + " - oauth_content_type: " + oauth_content_type)
-							response = requests.request(oauth_http_method, oauth_url, json=oauth_data, headers=oauth_headers, timeout=30)
+							response = requests.request(oauth_http_method, oauth_url, json=oauth_data, headers=oauth_headers, timeout=30, verify=verify_ssl)
 						else:
 							# Make sure the Content-Type header is set to application/x-www-form-urlencoded
 							oauth_headers = check_for_header(oauth_headers, "content-type", "application/x-www-form-urlencoded")
 							# self._logger.info("oauth headers: " + json.dumps(oauth_headers) + " - data: " + json.dumps(oauth_data))
 							# self._logger.info("oauth_http_method: " + oauth_http_method + " - oauth_content_type: " + oauth_content_type)
-							response = requests.request(oauth_http_method, oauth_url, data=oauth_data, headers=oauth_headers, timeout=30)
+							response = requests.request(oauth_http_method, oauth_url, data=oauth_data, headers=oauth_headers, timeout=30, verify=verify_ssl)
 					
 					# 1.3) Check to make sure we got a valid response code.
 					self._logger.info("OAuth Response: " + " - " + response.text)
@@ -579,6 +592,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				url = hook["url"]
 				api_secret = hook["apiSecret"]
 				device_identifier = hook["deviceIdentifier"]
+				verify_ssl = hook["verify_ssl"]
 				headers = json.loads(hook["headers"])
 				parsed_headers = 1
 				data = json.loads(hook["data"])
@@ -650,7 +664,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				response = ""
 				if http_method == "GET":
 					# Note: we can't upload a file with GET.
-					response = requests.get(url, params=data, headers=headers, timeout=10)
+					response = requests.get(url, params=data, headers=headers, timeout=10, verify=verify_ssl)
 				else:
 					if try_to_upload_file:
 						# Delete the Content-Type header if provided so that requests can set it on its own
@@ -673,7 +687,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						}
 
 						# No timeout when uploading file as this could take some time.
-						response = requests.request(http_method, url, files=files, data=data, headers=headers)
+						response = requests.request(http_method, url, files=files, data=data, headers=headers, verify=verify_ssl)
 
 					elif content_type == "JSON":
 						# Make sure the Content-Type header is set to application/json
@@ -681,7 +695,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						self._logger.info("headers: " + json.dumps(headers))
 						self._logger.info("data: " + json.dumps(data))
 						self._logger.info("http_method: " + http_method + " - content_type: " + content_type)
-						response = requests.request(http_method, url, json=data, headers=headers, timeout=30)
+						response = requests.request(http_method, url, json=data, headers=headers, timeout=30, verify=verify_ssl)
 
 					else:
 						# Make sure the Content-Type header is set to application/x-www-form-urlencoded
@@ -691,7 +705,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						self._logger.info("headers: " + json.dumps(headers))
 						self._logger.info("data: " + json.dumps(data))
 						self._logger.info("http_method: " + http_method + " - content_type: " + content_type)
-						response = requests.request(http_method, url, data=data, headers=headers, timeout=30)
+						response = requests.request(http_method, url, data=data, headers=headers, timeout=30, verify=verify_ssl)
 
 				self._logger.info("Response: " + response.text)
 

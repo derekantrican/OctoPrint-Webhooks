@@ -213,6 +213,7 @@ $(function() {
 
                 'customEvents': ko.computed(() => []),
 
+                'verify_ssl': ko.observable(true),
                 'headers': ko.observable('{\n  "Content-Type": "application/json"\n}'),
                 'data': ko.observable('{\n  "deviceIdentifier":"@deviceIdentifier",\n  "apiSecret":"@apiSecret",\n  "topic":"@topic",\n  "message":"@message",\n  "extra":"@extra",\n  "state": "@state",\n  "job": "@job",\n  "progress": "@progress",\n  "currentZ": "@currentZ",\n  "offsets": "@offsets",\n  "meta": "@meta",\n  "currentTime": "@currentTime",\n  "snapshot": "@snapshot"\n}'),
                 'http_method': ko.observable("POST"),

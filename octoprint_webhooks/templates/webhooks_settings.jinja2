@@ -419,6 +419,12 @@
                 For a list of all possible parameters, see the
                 <a target="_blank" href="https://github.com/derekantrican/OctoPrint-Webhooks#advanced-configuration">README</a>.
             </div>
+            <div class="controls" style="margin-bottom: 20px">
+                <input type="checkbox" data-bind="checked: verify_ssl">
+                <span class="control-description2">
+                    Verify SSL (https) certificate
+                </span>
+            </div>
             <label class="control-label">{{ _('HEADERS') }}</label>
             <div class="controls">
                 <button type="button" class="input-button" data-bind="click: $root.resetHeadersToDefaults">Reset to Defaults</button>
