@@ -613,7 +613,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					"deviceIdentifier": device_identifier,
 					"extra": extra,
 					"currentTime": int(time.time()),
-					"percentCompleteMilestone": percent_complete_milestone
+					"percentCompleteMilestone": percent_complete_milestone,
+					"appearance": self._settings.global_get(["appearance"])
 				}
 				values.update(values2)
 

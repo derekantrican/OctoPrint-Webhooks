@@ -250,6 +250,14 @@ for more information.
 }
 ```
 
+@appearance - a dictionary of the appearance data for your octoprint instance. This reflects the values in OctoPrint Settings > Appearance *(note that default values may not show up in this dictionary)*
+```
+{
+  "color": "black",
+  "name": "MyTestName"
+}
+```
+
 @currentTime - The time of the event in number of seconds since the epoch.
 The epoch is usually January 1 1970, 00:00:00 (UTC).
 
