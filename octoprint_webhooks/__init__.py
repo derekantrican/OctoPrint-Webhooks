@@ -718,17 +718,17 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				code = response.status_code
 
 				if 200 <= code < 400:
-					self._logger.info("API SUCCESS: " + event + " " + response.text)
+					self._logger.info("Webhook Delivered " + event + " " + response.text)
 					# Optionally show a message of success if the payload has popup=True
 					if type(payload) is dict and "popup" in payload:
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="success", hide=True, msg="Response: " + response.text))
 
 				else:
-					self._logger.info("API Bad Response Code: %s" % code)
+					self._logger.info("Webhook Failed - Response Code: %s" % code)
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=False, msg="Invalid API Response: " + response.text))
 
 			except requests.exceptions.RequestException as e:
-				self._logger.info("API ERROR: " + str(e))
+				self._logger.info("Webhook Error: " + str(e))
 				self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="API Error: " + str(e)))
 			except Exception as e:
 				if parsed_headers == 1:
