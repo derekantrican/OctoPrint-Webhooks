@@ -177,7 +177,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		)
 
 	def on_after_startup(self):
-		self._logger.info("Hello World from WebhooksPlugin!")
+		self._logger.info("WebHooks Plugin Starting")
 		# Update the settings if necessary
 		self.migrate_settings()
 
@@ -415,13 +415,13 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 						rd.update(metadata)
 					else:
-						self._logger.info("file does not exist at path")
+						self._logger.debug(f"file does not exist at {path}")
 
 			# self._logger.info("getting job info" + json.dumps(rd))
 			return rd
 		
 		except Exception as e:
-			self._logger.info("get_job_information exception: " + str(e))
+			self._logger.warn("get_job_information exception: " + str(e))
 			return {}
 
 	event_times = {}
@@ -468,8 +468,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			topic = "Unknown"
 			message = "Unknown"
 			extra = payload
-			self._logger.info(f"event: {event}") # temp for debugging
-			self._logger.info(f"payload: {payload}") # temp for debugging
+			self._logger.debug(f"event: {event}")
+			self._logger.debug(f"payload: {payload}")
 
 			# 0) Determine the topic and message parameters and if we are parsing this event.
 			if event == Events.PRINT_STARTED and hook["eventPrintStarted"]:
@@ -512,7 +512,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				if skipProcessing:
 					continue
 			
-			self._logger.info("P EVENT %s - %s" % (topic, message))
+			self._logger.debug("P EVENT %s - %s" % (topic, message))
 			# 1) If necessary, make an OAuth request to get back an access token.
 			oauth = hook["oauth"]
 			oauth_result = dict()
@@ -531,7 +531,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					oauth_content_type = hook["oauth_content_type"]
 					
 					# 1.2) Send the request
-					self._logger.info("Sending OAuth Request")
+					self._logger.debug("Sending OAuth Request")
 					response = ""
 
 					if oauth_http_method == "GET":
@@ -551,29 +551,29 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 							response = requests.request(oauth_http_method, oauth_url, data=oauth_data, headers=oauth_headers, timeout=30, verify=verify_ssl)
 					
 					# 1.3) Check to make sure we got a valid response code.
-					self._logger.info("OAuth Response: " + " - " + response.text)
+					self._logger.debug("OAuth Response: " + " - " + response.text)
 					code = response.status_code
 
 					if 200 <= code < 400:
 						oauth_result = response.json()
 						oauth_passed = True
-						self._logger.info("OAuth Passed")
+						self._logger.debug("OAuth Passed")
 					else:
-						self._logger.info("Invalid OAuth Response Code %s" % code)
+						self._logger.debug("Invalid OAuth Response Code %s" % code)
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=False, msg="Invalid OAuth Response: " + response.text))
 
 				except requests.exceptions.RequestException as e:
-					self._logger.info("OAuth API Error: " + str(e))
+					self._logger.warn("OAuth API Error: " + str(e))
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="OAuth API Error: " + str(e)))
 				except Exception as e:
 					if parsed_oauth_headers == 1:
-						self._logger.info("OAuth JSON Parse Issue for DATA")
+						self._logger.debug("OAuth JSON Parse Issue for DATA")
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="Invalid JSON for Webhooks OAUTH DATA Settings"))
 					elif parsed_oauth_headers == 0:
-						self._logger.info("OAuth JSON Parse Issue for HEADERS")
+						self._logger.debug("OAuth JSON Parse Issue for HEADERS")
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="Invalid JSON for Webhooks OAUTH HEADERS Settings"))
 					else:
-						self._logger.info("Unknown OAuth Issue: " + str(e))
+						self._logger.debug("Unknown OAuth Issue: " + str(e))
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="Unknown Issue when trying to call OAUTH API."))
 
 			else:
@@ -646,7 +646,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					if snap is None:
 						snap = self.get_snapshot()
 					if snap is not None:
-						self._logger.info("snapshot retrieved")
+						self._logger.debug("snapshot retrieved")
 					else:
 						uploading_file = False
 
@@ -657,9 +657,9 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				data = replace_dict_with_data(data, values)
 				headers = replace_dict_with_data(headers, values)
 				url = replace_url_with_data(url, values)
-				self._logger.info(f"url: {url}") # temp for debugging
-				self._logger.info(f"values: {values}") # temp for debugging
-				self._logger.info(f"data: {data}") # temp for debugging
+				self._logger.debug(f"url: {url}") # temp for debugging
+				self._logger.debug(f"values: {values}") # temp for debugging
+				self._logger.debug(f"data: {data}") # temp for debugging
 
 				# 2.6) Send the request
 				response = ""
@@ -679,10 +679,10 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 
 						# We need to inner json_encode any dictionaries and arrays.
 						data = inner_json_encode(data)
-						self._logger.info("headers: " + json.dumps(headers))
-						self._logger.info("data: " + json.dumps(data))
-						self._logger.info("http_method: " + http_method + " - content_type: " + content_type)
-						self._logger.info("sending snapshot as parameter: " + uploading_file_name)
+						self._logger.debug("headers: " + json.dumps(headers))
+						self._logger.debug("data: " + json.dumps(data))
+						self._logger.debug("http_method: " + http_method + " - content_type: " + content_type)
+						self._logger.debug("sending snapshot as parameter: " + uploading_file_name)
 						files = {
 							uploading_file_name: ("snapshot.jpg", snap, "image/jpeg")
 						}
@@ -693,9 +693,9 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					elif content_type == "JSON":
 						# Make sure the Content-Type header is set to application/json
 						headers = check_for_header(headers, "content-type", "application/json")
-						self._logger.info("headers: " + json.dumps(headers))
-						self._logger.info("data: " + json.dumps(data))
-						self._logger.info("http_method: " + http_method + " - content_type: " + content_type)
+						self._logger.debug("headers: " + json.dumps(headers))
+						self._logger.debug("data: " + json.dumps(data))
+						self._logger.debug("http_method: " + http_method + " - content_type: " + content_type)
 						response = requests.request(http_method, url, json=data, headers=headers, timeout=30, verify=verify_ssl)
 
 					else:
@@ -703,12 +703,12 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 						headers = check_for_header(headers, "content-type", "application/x-www-form-urlencoded")
 						# We need to inner json_encode any dictionaries and arrays.
 						data = inner_json_encode(data)
-						self._logger.info("headers: " + json.dumps(headers))
-						self._logger.info("data: " + json.dumps(data))
-						self._logger.info("http_method: " + http_method + " - content_type: " + content_type)
+						self._logger.debug("headers: " + json.dumps(headers))
+						self._logger.debug("data: " + json.dumps(data))
+						self._logger.debug("http_method: " + http_method + " - content_type: " + content_type)
 						response = requests.request(http_method, url, data=data, headers=headers, timeout=30, verify=verify_ssl)
 
-				self._logger.info("Response: " + response.text)
+				self._logger.debug("Response: " + response.text)
 
 				# Log the event time for cooldown (do it here so we're only keeping track of events that the
 				# user is actually subscribed to - actually sending a request)
@@ -718,17 +718,17 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				code = response.status_code
 
 				if 200 <= code < 400:
-					self._logger.info("API SUCCESS: " + event + " " + response.text)
+					self._logger.info("Webhook Delivered " + event + " " + response.text)
 					# Optionally show a message of success if the payload has popup=True
 					if type(payload) is dict and "popup" in payload:
 						self._plugin_manager.send_plugin_message(self._identifier, dict(type="success", hide=True, msg="Response: " + response.text))
 
 				else:
-					self._logger.info("API Bad Response Code: %s" % code)
+					self._logger.info("Webhook Failed - Response Code: %s" % code)
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=False, msg="Invalid API Response: " + response.text))
 
 			except requests.exceptions.RequestException as e:
-				self._logger.info("API ERROR: " + str(e))
+				self._logger.info("Webhook Error: " + str(e))
 				self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", msg="API Error: " + str(e)))
 			except Exception as e:
 				if parsed_headers == 1:
@@ -759,12 +759,12 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 	# :return:
 	def get_snapshot(self):
 		# 1) Get the snapshot url if set and other webcam settings
-		self._logger.info("Getting Snapshot")
+		self._logger.debug("Getting Snapshot")
 		snapshot_url = self._settings.global_get(["webcam", "snapshot"])
 		hflip = self._settings.global_get(["webcam", "flipH"])
 		vflip = self._settings.global_get(["webcam", "flipV"])
 		rotate = self._settings.global_get(["webcam", "rotate90"])
-		self._logger.info("Snapshot URL: " + str(snapshot_url))
+		self._logger.debug("Snapshot URL: " + str(snapshot_url))
 		
 		if type(snapshot_url) is not str:
 			return None
