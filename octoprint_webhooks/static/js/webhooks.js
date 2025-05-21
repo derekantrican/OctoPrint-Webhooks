@@ -272,7 +272,9 @@ $(function() {
 
 			new PNotify({
 			    title: 'Webhooks',
+                title_escape: true,
                 text: data.msg,
+                text_escape: true,
                 type: data.type,
 			    hide: hide
 			});

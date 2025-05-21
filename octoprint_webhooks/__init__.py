@@ -13,6 +13,7 @@ from PIL import Image
 
 import octoprint.plugin
 from octoprint.events import eventManager, Events
+from octoprint.access.permissions import Permissions
 
 # Returns if the variable is a unicode or string accounting for both python 2 & 3.
 def is_string(unicode_or_str):
@@ -359,6 +360,10 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 		)
 
 	def on_api_command(self, command, data):
+		# The commands below are only used in the plugin settings page
+		if not Permissions.SETTINGS.can():
+			return "Insufficient rights", 403
+
 		if command == "testhook":
 			# self._logger.info("API testhook CALLED!")
 			# TRIGGER A CUSTOM EVENT FOR A TEST PAYLOAD
