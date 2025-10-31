@@ -308,7 +308,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				"templates/dotnotation.json",
 				"templates/slack.json",
 				"templates/plivo.json",
-				"templates/alexa_notify_me.json"
+				"templates/alexa_notify_me.json",
+				"templates/ntfy_attachment.json"
 			]
 		)
 

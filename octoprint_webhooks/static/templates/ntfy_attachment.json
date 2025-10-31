@@ -1,0 +1,19 @@
+{
+  "content_type": "JSON",
+  "data": "{\n  \"topic\":\"octoprint\",\n  \"title\": \"@deviceIdentifier @appearance.name - @topic\",\n  \"message\":\"@message \\nState: @state.text \\nJob: @job.file.name\"\n}",
+  "eventErrorMessage": "There was an error.",
+  "eventPrintDoneMessage": "Your print is done.",
+  "eventPrintFailedMessage": "Something went wrong and your print has failed.",
+  "eventPrintPausedMessage": "Your print has paused. You might need to change the filament color.",
+  "eventPrintProgressMessage": "Your print is @percentCompleteMilestone % complete.",
+  "eventPrintStartedMessage": "Your print has started",
+  "eventUserActionNeededMessage": "User action needed. You might need to change the filament color.",
+  "event_cooldown": 0,
+  "event_print_progress_interval": "50",
+  "headers": "{\n  \"Content-Type\": \"application/json\",\n  \"Filename\": \"3dprint.jpg\",\n  \"Attach\": \"https://127.0.0.1/webcam/?action=snapshot\",\n  \"Authorization\": \"@apiSecret\"\n}",
+  "http_method": "POST",
+  "oauth": false,
+  "verify_ssl": true,
+  "_name": "Ntfy - Attachment",
+  "_description": "Post to a ntfy.sh server with an image attachment. For an attachment the ntfy server must be able to reach the octoprint webcam image URL. To configure, fill in the Ntfy server root URL. Fill in your credentails in the \"Webhook Paramaters\" -> \"API Secret\" field according to the ntfy documentation section \"Sending Messages\" -> \"Authentication\". E.G for a token, use \"Bearer tk_tokenvalue\". In the Headers section of the plugin Advanced settings, modify the image URL to point to your webcam image, or remove Filename and Attach if no attachment is desired. Modify the Topic in the JSON Data section."
+}
