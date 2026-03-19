@@ -211,7 +211,7 @@ $(function() {
                 'eventPrintProgressMessage': ko.observable("Your print is @percentCompleteMilestone % complete."),
                 'eventErrorMessage': ko.observable("There was an error."),
 
-                'customEvents': ko.computed(() => []),
+                'customEvents': ko.observableArray([]),
 
                 'verify_ssl': ko.observable(true),
                 'headers': ko.observable('{\n  "Content-Type": "application/json"\n}'),
