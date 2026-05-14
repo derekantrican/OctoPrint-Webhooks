@@ -296,6 +296,9 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 			dict(type="settings", custom_bindings=True)
 		]
 
+	def is_template_autoescaped(self):
+		return True
+
 	def get_assets(self):
 		return dict(
 			css=["css/webhooks.css"],
