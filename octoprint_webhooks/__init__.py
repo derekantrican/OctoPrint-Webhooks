@@ -357,6 +357,9 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=True, msg="Invalid Setting for PRINT PROGRESS INTERVAL please use a number without any special characters instead of " + event_print_progress_interval))
 					continue
 
+	def is_api_protected(self):
+		return True
+
 	def get_api_commands(self):
 		return dict(
 			testhook=[],
