@@ -1,0 +1,45 @@
+[build-system]
+requires = [
+    "setuptools>=68",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "OctoPrint-Webhooks"
+version = "4.4.0"
+description = "When certain events occur, a custom webhook will be sent to anywhere you want!"
+authors = [
+    { name = "Derek Antrican (formerly Blane Townsend)", email = "derekantrican@gmail.com" },
+]
+requires-python = ">=2.7,<4"
+dependencies = [
+    "requests",
+    "pillow",
+]
+dynamic = [
+    "license",
+]
+
+[project.entry-points."octoprint.plugin"]
+webhooks = "octoprint_webhooks"
+
+[project.urls]
+Homepage = "https://github.com/derekantrican/OctoPrint-Webhooks"
+
+[project.optional-dependencies]
+develop = [
+    "go-task-bin",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = [
+    "octoprint_webhooks",
+    "octoprint_webhooks.*",
+]
