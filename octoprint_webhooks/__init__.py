@@ -350,7 +350,7 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 					# Update the last print progress
 					self.last_print_progress = progress
 
-				except Exception as e:
+				except Exception:
 					self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", hide=True, msg="Invalid Setting for PRINT PROGRESS INTERVAL please use a number without any special characters instead of " + event_print_progress_interval))
 					continue
 
@@ -508,7 +508,8 @@ class WebhooksPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePl
 				elif "customEvents" in hook: # Don't check for customEvents before settings have been migrated
 					customEvents = hook["customEvents"]
 					for customEvent in customEvents:
-						if customEvent["name"].casefold() != event.casefold(): continue
+						if customEvent["name"].casefold() != event.casefold():
+							continue
 
 						topic = "Custom Event"
 						message = customEvent["message"]
