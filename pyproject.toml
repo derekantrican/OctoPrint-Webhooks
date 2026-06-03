@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "OctoPrint-Webhooks"
-version = "4.4.0"
+version = "5.0.0"
 description = "When certain events occur, a custom webhook will be sent to anywhere you want!"
 authors = [
     { name = "Derek Antrican (formerly Blane Townsend)", email = "derekantrican@gmail.com" },
